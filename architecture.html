@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="description" content="Cognitum MaaS architecture — the layered request pipeline (auth, tier router, budget reserve, provider, metering, commit, rate limit) and the Darwin-Loop pod substrate, at a high level.">
+  <title>Architecture — Cognitum MaaS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <span class="brand">Cognitum<span class="dot">.</span>MaaS</span>
+      <nav class="site">
+        <a href="index.html">Home</a>
+        <a href="capabilities.html">Capabilities</a>
+        <a href="architecture.html" class="active">Architecture</a>
+        <a href="status.html">Status</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section>
+        <h2>Architecture</h2>
+        <p>How the platform composes. Every request and every pod step flows through the same ordered set of
+          layers. This is the high-level view; the implementation, configuration, and keys are private.</p>
+        <div class="callout info small"><strong>The one-line model.</strong> An authenticated, multi-tenant
+          request → the tier router scores its intrinsic difficulty and picks a model tier → the provider calls a
+          commodity model → metering books every token → a Reserve-and-Commit budget tracker governs the spend →
+          a scatter-gather rate limiter bounds throughput. The same substrate drives Darwin-Loop pods with a human
+          approval gate, and a flywheel turns assumed routing parameters into measured ones.</div>
+      </section>
+
+      <section>
+        <h2>Request lifecycle</h2>
+<pre class="diagram">
+  client (OpenAI SDK,        ┌──────────────────────────────────────────────┐
+  Anthropic SDK, curl,       │            api.cognitum.one  (cloud)          │
+  agentic hosts, …)          │                                              │
+        │  authenticated key │   routes:  /v1/chat/completions              │
+        ▼ ─────────────────► │            /v1/completions · /v1/messages    │
+                             │            /v1/models · /v1/pods/* · /healthz │
+                             │                                              │
+                             │   1. AUTH         key → tenant + scopes      │
+                             │   2. XLATE        Anthropic ↔ canonical      │
+                             │   3. TIER ROUTER  difficulty → low|mid|high  │
+                             │                   min/max clamp · hot params │
+                             │   4. RESERVE      worst-case · fail-closed    │
+                             │   5. PROVIDER     commodity model call        │
+                             │   6. METERING     token count → usage ledger  │
+                             │   7. COMMIT       actual cost                  │
+                             │   8. RATE LIMIT   scatter-gather throughput    │
+                             │        ▼                                       │
+                             │   response + {resolved_tier, escalated, price} │
+                             └──────────────────────────────────────────────┘
+                                   │                          ▲
+                                   ▼ usage ledger             │ routing params (hot-reload)
+                          ┌──────────────────┐      ┌───────────────────────┐
+                          │ async rollup     │ ───► │  FLYWHEEL             │
+                          └──────────────────┘      │  assumed → MEASURED   │
+                                                    └───────────────────────┘
+
+  ── Darwin-Loop pods ride the SAME substrate ───────────────────────────────
+  /v1/pods/spawn → pod = {domain × HOST × tier}
+       loop:  SPAWNED → EXECUTING → EVALUATING → IDLE   (each step metered + budgeted)
+       gate:  EVALUATING → ESCALATING → AWAITING_APPROVAL (reservation HELD)
+                          → approve = COMMIT  |  reject = RELEASE  |  timeout = auto-reject
+       bench: scores real captured artifacts → escalate on non-conformance
+</pre>
+      </section>
+
+      <section>
+        <h2>Layer by layer</h2>
+        <ol>
+          <li><strong>Auth — multi-tenant identity.</strong> A key is hashed and looked up to yield its scopes and
+            the account that defines the tenant. Every owned resource is scoped to that account; cross-tenant
+            access and non-existence both return the same response, so existence never leaks.</li>
+          <li><strong>Anthropic translation.</strong> The Anthropic Messages shape (system blocks, tool-use,
+            tool-result, tool-choice) is translated to and from the canonical internal request — including full
+            tool-use forwarding — for both streaming and non-streaming. An honesty guard ensures the reported model
+            always reflects the real resolved model.</li>
+          <li><strong>Tier router.</strong> An intrinsic difficulty signal, computed from the input alone, selects
+            the tier, then clamps to the request's floor/cap and the key's highest scope. The weights, bands, and
+            thresholds are hot-reloadable, so a calibration applies without a redeploy.</li>
+          <li><strong>Budget reserve / commit.</strong> An atomic two-phase tracker reserves a worst-case estimate
+            before the provider call and commits the actual cost after. It is sharded for concurrency; no headroom
+            means no reservation and the provider is never invoked (fail-closed), with an account hard-cap backstop.</li>
+          <li><strong>Provider.</strong> An abstraction over a commodity-model pool, with a zero-cost mock for tests
+            and local development. The <code class="inline">cognitum-*</code> aliases map to vendor models via tier
+            pools; raw vendor ids are never exposed.</li>
+          <li><strong>Metering.</strong> Every request is metered with a family-correct progressive tokenizer; the
+            local count is the billing floor on disconnect, and usage is rolled up asynchronously.</li>
+          <li><strong>Rate limit.</strong> A scatter-gather limiter bounds throughput without serializing on a
+            counter, plus tenant-scoped idempotency to dedupe retries.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>The pod substrate &amp; flywheel</h2>
+        <p><strong>Darwin-Loop pods</strong> reuse the same auth → tier → reserve → provider → meter → commit
+          pipeline for each step. A plugin firewall (a fail-closed dynamic-import boundary) underpins both the host
+          registry and third-party plugins: a load or contract failure is isolated and audited while the core stays
+          online — a graceful skip, never a faked success.</p>
+        <p>The <strong>flywheel</strong> turns the heuristic routing priors into measured parameters by aggregating
+          the usage ledger into an observed tier-mix and per-tier rates, then writing the hot-reloadable params.
+          Honestly: the current sample is small, so this is a measured-from-limited-data calibration that sharpens
+          with volume — a <em>learned</em> router would additionally need a per-request quality label the ledger
+          does not yet carry.</p>
+      </section>
+
+      <section>
+        <h2>Deployment posture</h2>
+        <p class="muted">The service runs as a managed container on Google Cloud behind an authenticated public
+          endpoint. Continuous integration is emulator-first and zero-cost; continuous deployment is keyless
+          (workload-identity federation, least-privilege) and deploys only the exact commit that passed CI.
+          Provider credentials live in a managed secret store, read by the runtime at request time — never baked
+          into an image or a CI secret. Specific project identifiers, service-account names, and secret names are
+          intentionally omitted from this public document.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Cognitum MetaHarness-as-a-Service · public high-level docs.</span>
+      <span><a href="index.html">Home</a> · <a href="capabilities.html">Capabilities</a> · <a href="status.html">Status</a></span>
+    </div>
+  </footer>
+</body>
+</html>

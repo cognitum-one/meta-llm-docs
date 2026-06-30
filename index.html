@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Cognitum MetaHarness-as-a-Service — a multi-tenant, tiered, metered, budget-governed, dual-protocol Completions API plus autonomous Darwin-Loop agent pods with human approval gates. A governance / cost / safety platform on commodity models — not a frontier model.">
+  <title>Cognitum MetaHarness-as-a-Service</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <span class="brand">Cognitum<span class="dot">.</span>MaaS</span>
+      <nav class="site">
+        <a href="index.html" class="active">Home</a>
+        <a href="capabilities.html">Capabilities</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="status.html">Status</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="wrap">
+      <span class="tagline">governance · cost · safety · multi-tenancy</span>
+      <h1>MetaHarness-as-a-Service</h1>
+      <p class="lede">A multi-tenant, tiered, metered, budget-governed, <strong>dual-protocol</strong>
+        (OpenAI&nbsp;+&nbsp;Anthropic) Completions API — plus autonomous <strong>Darwin-Loop agent pods</strong>
+        with human approval gates — that rides commodity models at a measured Pareto cost-corner.
+        Deployed on Google Cloud.</p>
+      <div class="cta">
+        <a class="btn primary" href="capabilities.html">See the capabilities</a>
+        <a class="btn" href="architecture.html">How it composes</a>
+        <a class="btn" href="status.html">Honest status ledger</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="wrap">
+
+      <section>
+        <h2>What Cognitum MaaS is</h2>
+        <p>Cognitum MaaS is an <strong>orchestration and governance layer</strong> that sits in front of
+          commodity language models. Point any OpenAI- or Anthropic-style SDK at one authenticated,
+          metered, budget-defended endpoint, and every request is routed to an appropriate cost tier,
+          every token is metered, and every dollar is governed before a model is ever called.</p>
+        <p>On top of the same substrate it runs <strong>Darwin-Loop pods</strong> — autonomous agent loops
+          defined as <code class="inline">pod = {domain × host × tier}</code> — where any irreversible or
+          outward-facing action parks at a <strong>human approval gate</strong> instead of executing blind.</p>
+      </section>
+
+      <section>
+        <h2>The honest framing</h2>
+        <div class="callout">
+          <p><strong>This is a governance / cost / safety / multi-tenancy platform — not a frontier model.</strong>
+            Its thesis is measured, not asserted: on everyday agentic work a cheap model tier is
+            frontier-class at a fraction of the cost, so a router that spends the frontier <em>only</em> on the
+            hard tail is both cheaper and equal-quality for the bulk of traffic.</p>
+          <p class="small muted" style="margin-bottom:0">Orchestration here is a <strong>cost lever, not an
+            accuracy lever</strong>. We do not claim beyond-SOTA capability, a trained coordinator, or any
+            quality lift over the underlying commodity models. See the
+            <a href="status.html">Status ledger</a> for the built-vs-roadmap truth.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>The value, in three dials</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="num">DIAL 1</div>
+            <h3>Tier</h3>
+            <p class="muted small">An intrinsic difficulty signal routes each request to a
+              <code class="inline">low</code> / <code class="inline">mid</code> / <code class="inline">high</code>
+              tier, so cheap traffic stays cheap and only the hard tail escalates.</p>
+          </div>
+          <div class="card">
+            <div class="num">DIAL 2</div>
+            <h3>Host</h3>
+            <p class="muted small">The agentic runtime that drives a pod's loop — always pointed back at the
+              gateway, so model calls stay tiered, metered, and budget-capped regardless of host.</p>
+          </div>
+          <div class="card">
+            <div class="num">DIAL 3</div>
+            <h3>Approval gate</h3>
+            <p class="muted small">Irreversible or outward actions park for a human verdict, holding a budget
+              reservation but spending nothing until approved. A timeout fails safe — never auto-approve.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Why it matters</h2>
+        <ul>
+          <li><strong>Cost discipline by construction.</strong> A Reserve-and-Commit budget tracker reserves a
+            worst-case estimate before each call and commits the actual cost after — fail-closed when there is
+            no headroom, so a runaway loop pauses instead of draining a budget.</li>
+          <li><strong>Tenant isolation.</strong> Every key owns its own resources; another tenant's resources and
+            a non-existent resource collapse to the same response, so existence never leaks across tenants.</li>
+          <li><strong>One surface, two protocols.</strong> OpenAI and Anthropic wire formats — including real
+            tool-use translation — behind a single authenticated, metered endpoint.</li>
+          <li><strong>Self-calibrating economics.</strong> A flywheel turns assumed routing parameters into
+            measured ones from the usage ledger and hot-reloads them with no redeploy.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>The business-autopilot vision</h2>
+        <p class="muted">Longer-term, the same gated, metered pod substrate is the foundation for
+          <strong>business autopilot</strong>: domain-scoped agent pods (sales, finance, support, ops) that
+          collaborate across human-facing surfaces, each irreversible step routed to a person for approval, every
+          dollar governed. That layer is <a href="status.html">design-stage today</a> — the platform states
+          honestly what is live versus roadmap.</p>
+        <div class="callout info small">
+          <strong>Related, but distinct.</strong> Cognitum MaaS is the serving + governance platform. The
+          MetaHarness Studio and the AgentBBS arena are separate surfaces that build on it; this site documents
+          the platform only.</div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Cognitum MetaHarness-as-a-Service · public high-level docs · the API and its source remain private and auth-gated.</span>
+      <span><a href="architecture.html">Architecture</a> · <a href="status.html">Status</a> · <a href="/.well-known/security.txt">security.txt</a></span>
+    </div>
+  </footer>
+</body>
+</html>

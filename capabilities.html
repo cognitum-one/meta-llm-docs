@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="description" content="Cognitum MaaS capabilities overview — the three dials (tier, host, approval gate), Darwin-Loop pods, metering and budget governance, and the business-autopilot vision, at a conceptual level.">
+  <title>Capabilities — Cognitum MaaS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <span class="brand">Cognitum<span class="dot">.</span>MaaS</span>
+      <nav class="site">
+        <a href="index.html">Home</a>
+        <a href="capabilities.html" class="active">Capabilities</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="status.html">Status</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section>
+        <h2>Capabilities overview</h2>
+        <p class="muted">A conceptual tour of what the platform does. For how the pieces compose internally see
+          the <a href="architecture.html">Architecture</a> page; for what is live versus roadmap see the
+          <a href="status.html">Status ledger</a>.</p>
+      </section>
+
+      <section>
+        <h2>The three dials</h2>
+
+        <h3>Dial 1 — Tier (the model dial)</h3>
+        <p>Each request is scored by an <strong>intrinsic difficulty signal</strong> computed from the request
+          input alone — length, code and reasoning markers, output-length band, and tool usage. That score
+          selects a <code class="inline">low</code> / <code class="inline">mid</code> /
+          <code class="inline">high</code> tier, with an optional dynamic escalation up the tiers for the harder
+          tail. Callers can clamp a quality floor (<code class="inline">min_tier</code>) and a cost cap
+          (<code class="inline">max_tier</code>). The response reports which tier actually resolved, whether it
+          escalated, and the price. Model aliases are <code class="inline">cognitum-auto / low / mid / high</code>
+          — raw vendor model ids are never exposed.</p>
+
+        <h3>Dial 2 — Host (the runtime dial)</h3>
+        <p>A pod can be driven by different agentic runtimes ("hosts"). Whichever host drives the loop, it is
+          <strong>pointed back at the gateway</strong>, so every model call stays tiered, metered, and
+          budget-capped no matter which runtime is in the driver's seat. Host choice is itself a measured cost
+          lever — a heavyweight scaffold can force a more expensive tier, so the platform treats host as a
+          first-class axis. An unavailable host <em>pauses</em> the pod with an audit warning rather than faking
+          a result.</p>
+
+        <h3>Dial 3 — Approval gate (the safety dial)</h3>
+        <p>When a pod step proposes an action that trips its configured gate (for example, anything irreversible
+          or outward-facing), the pod parks in an <strong>awaiting-approval</strong> state. It <em>holds</em> a
+          worst-case budget reservation — reserved, not spent — and posts a signed proposal. A human resolves it:</p>
+        <ul>
+          <li><strong>Approve</strong> → commit the held reservation at the real step cost → the pod resumes.</li>
+          <li><strong>Reject</strong> → release the reservation (spend nothing, zero outward effect) → the pod resumes.</li>
+          <li><strong>Timeout</strong> → auto-reject (fail-safe; never auto-approve) → the pod pauses.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Darwin-Loop pods</h2>
+        <p>A pod is an autonomous agent loop defined as <code class="inline">pod = {domain × host × tier}</code>.
+          The engine drives a step lifecycle — spawn, execute, evaluate, idle — where each step is a real,
+          metered, budgeted model call. A behavioral bench scores the captured artifacts of each step against the
+          pod's contract; a non-conforming result escalates the pod. A runaway pod that exhausts its budget
+          <strong>pauses</strong> at a bounded spend rather than running away.</p>
+      </section>
+
+      <section>
+        <h2>Metering &amp; budget governance</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Family-correct metering</h3>
+            <p class="muted small">Every request is tokenized with a family-correct progressive tokenizer and
+              booked into a usage ledger. The local count is the billing floor on disconnect or truncation; the
+              provider's authoritative count is preferred when available.</p>
+          </div>
+          <div class="card">
+            <h3>Reserve-and-Commit</h3>
+            <p class="muted small">An atomic two-phase budget tracker reserves a worst-case estimate before the
+              call and commits the actual cost after. Sharded per agent so high-concurrency loops don't contend;
+              an account hard-cap is the final backstop.</p>
+          </div>
+          <div class="card">
+            <h3>Rate limiting</h3>
+            <p class="muted small">A scatter-gather limiter bounds throughput without serializing on a single
+              counter, with tenant-scoped idempotency keys to dedupe retries safely.</p>
+          </div>
+          <div class="card">
+            <h3>Self-calibrating flywheel</h3>
+            <p class="muted small">A calibration pass turns assumed routing parameters into measured ones from
+              the usage ledger and hot-reloads them — a recalibration takes effect with no redeploy.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Business-autopilot vision</h2>
+        <p>The gated, metered pod substrate is the foundation for a longer-term <strong>business-autopilot</strong>
+          layer: domain-scoped pods (sales, finance, support, ops) collaborating across human-facing surfaces,
+          each irreversible step routed to a person for approval and every dollar governed. The platform owns the
+          approval-gate seam today; the human-facing surfaces and business templates are design-stage. The
+          <a href="status.html">Status ledger</a> states exactly which pieces are live, built, or design-only.</p>
+        <div class="callout info small"><strong>Scope note.</strong> This page describes capabilities at a
+          conceptual level only. The platform's API, keys, and internals are private and auth-gated.</div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Cognitum MetaHarness-as-a-Service · public high-level docs.</span>
+      <span><a href="index.html">Home</a> · <a href="architecture.html">Architecture</a> · <a href="status.html">Status</a></span>
+    </div>
+  </footer>
+</body>
+</html>

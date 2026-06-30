@@ -1,0 +1,12 @@
+# Cognitum MetaHarness-as-a-Service — security contact
+# https://www.rfc-editor.org/rfc/rfc9116
+
+Contact: mailto:security@cognitum.one
+Preferred-Languages: en
+Canonical: https://cognitum-one.github.io/meta-llm-docs/.well-known/security.txt
+Policy: https://cognitum-one.github.io/meta-llm-docs/SECURITY.md
+Expires: 2027-06-30T00:00:00.000Z
+
+# This is a static, public documentation site. It contains no application code,
+# no API, no credentials, and no executable scripts. Please report any suspected
+# secret exposure or vulnerability to the contact above.

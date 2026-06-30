@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="description" content="Cognitum MaaS honest status ledger — what is live, built-and-tested, design-only, and blocked on an open dependency. No capability is listed as done without shipped evidence.">
+  <title>Status — Cognitum MaaS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <span class="brand">Cognitum<span class="dot">.</span>MaaS</span>
+      <nav class="site">
+        <a href="index.html">Home</a>
+        <a href="capabilities.html">Capabilities</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="status.html" class="active">Status</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section>
+        <h2>Honest status ledger</h2>
+        <p>The honest view of <strong>what is actually live, what is built-and-tested, what is design-only, and
+          what is blocked on an open dependency</strong>. Nothing here is inflated — a capability with no shipped
+          evidence is never listed as done.</p>
+        <div class="callout">
+          <p style="margin-bottom:0"><strong>Read this first.</strong> Cognitum MaaS is a governance / cost /
+            safety / multi-tenancy platform, not a capability-frontier model. It rides commodity models at a
+            measured Pareto cost-corner. The load-bearing claim is the cheap-vs-frontier finding — measured, not
+            asserted: on everyday agentic work, cheap models are frontier-class at a fraction of the cost, with a
+            real structural ceiling on the hard tail. The platform's value is <strong>orchestration as a cost
+            lever, not an accuracy lever</strong>. We do not claim beyond-SOTA capability, a trained coordinator,
+            or any quality lift over the underlying models.</p>
+        </div>
+        <p class="small muted">Legend:
+          <span class="tag live">LIVE</span> proven against the live service &nbsp;
+          <span class="tag built">BUILT</span> implemented + tested, not yet on live infra &nbsp;
+          <span class="tag design">DESIGN</span> specified, not implemented &nbsp;
+          <span class="tag open">OPEN</span> a real gap or external dependency
+        </p>
+      </section>
+
+      <section>
+        <h2>Completions API — the serving primitive</h2>
+        <table>
+          <tr><th>Capability</th><th>Status</th></tr>
+          <tr><td>OpenAI chat completions (streaming + JSON) — primary serving path</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Anthropic Messages API (streaming + JSON), with real tool-use translation</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Legacy OpenAI completions shape</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Model listing (four <code class="inline">cognitum-*</code> aliases, no raw vendor ids)</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Liveness endpoint</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Multi-tenant key auth (hashed lookup → scopes)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Tier router — intrinsic difficulty (low / mid / high)</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Post-generation escalation (non-streaming)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Family-correct metering + usage ledger</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Reserve-and-Commit budget (sharded, account cap, fail-closed)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Scatter-gather rate limiter + tenant-scoped idempotency</td><td><span class="tag built">BUILT</span></td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Darwin-Loop pods</h2>
+        <table>
+          <tr><th>Capability</th><th>Status</th></tr>
+          <tr><td>Pod spawn + lifecycle (<code class="inline">pod = {domain × host × tier}</code>)</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Real pod executor + real artifact capture</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Runaway-cap pause (bounded spend on budget deny)</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Read-only pod poll (multi-tenant projection, no cross-tenant leak)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Host axis — native in-process runtime</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Host axis — CLI hosts (detect-and-skip until containers provisioned)</td><td><span class="tag open">OPEN</span></td></tr>
+          <tr><td>Behavioral bench over real artifacts</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Approval gate — park + reservation-held proposal + verdict</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Continuous scheduler-trigger cadence wiring</td><td><span class="tag open">OPEN</span></td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Flywheel, deploy &amp; economics</h2>
+        <table>
+          <tr><th>Capability</th><th>Status</th></tr>
+          <tr><td>Assumed → measured calibration from the usage ledger</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Hot-reloadable routing params + tier pools (no redeploy)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Learned-router bootstrap (trained head replacing the heuristic)</td><td><span class="tag open">OPEN</span></td></tr>
+          <tr><td>Managed-container service on Google Cloud (live)</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>CI — emulator-first, zero-cost</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>CD — keyless (workload-identity), deploy-from-HEAD, image-only</td><td><span class="tag live">LIVE</span></td></tr>
+          <tr><td>Budget-defense model (Reserve-and-Commit + caps)</td><td><span class="tag built">BUILT</span></td></tr>
+          <tr><td>Subscription / billing lifecycle &amp; checkout</td><td><span class="tag design">DESIGN</span></td></tr>
+          <tr><td>Human-facing surface adapters + business templates</td><td><span class="tag design">DESIGN</span></td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Known open dependencies</h2>
+        <ul>
+          <li><strong>Tenant ownership field</strong> is provisioned by an upstream gateway, not this service; until
+            then isolation is exercised on seeded fixtures.</li>
+          <li><strong>CLI hosts</strong> are detect-and-skip until their runtime containers are provisioned.</li>
+          <li><strong>Continuous pod cadence</strong> — the tick job is built and tested; wiring a recurring trigger
+            is a deployment decision.</li>
+          <li><strong>One optional inflight-escalation dependency</strong> is unpublished upstream, so that path
+            fail-closes to the standard one-shot routing — the operative, safe state.</li>
+          <li><strong>Learned router</strong> needs a per-request quality label the ledger does not yet carry.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>One-paragraph summary</h2>
+        <p class="muted">Cognitum MaaS is a multi-tenant, tiered, metered, budget-governed, dual-protocol
+          Completions API — deployed live on Google Cloud — plus a Darwin-Loop autonomous agent-pod system with a
+          human approval gate, all riding the same authenticated seam. It is honestly a governance / cost / safety /
+          multi-tenancy platform on commodity models at a measured Pareto cost-corner — not a capability-frontier
+          model. The serving path, real pod loop, runaway cap, native host, behavioral bench, flywheel calibration,
+          security hardening, and the approval-gate seam are live or built; the billing lifecycle, the surface
+          adapters and business templates, and the CLI hosts remain design-only, gated on a small set of open
+          dependencies. The API and its source code are private and auth-gated.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Cognitum MetaHarness-as-a-Service · public high-level docs.</span>
+      <span><a href="index.html">Home</a> · <a href="capabilities.html">Capabilities</a> · <a href="architecture.html">Architecture</a></span>
+    </div>
+  </footer>
+</body>
+</html>
